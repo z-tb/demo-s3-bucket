@@ -6,7 +6,7 @@ This repository contains Terraform configuration files for provisioning an Amazo
 
 Before you get started, ensure you have the following prerequisites:
 
-- [Terraform](https://www.terraform.io/) installed on your local machine. Due to the recent licensing draw around Terraform, it's recommended to move to [OpenTofo][https://opentofu.org/] at earliest convenience.
+- [Terraform](https://www.terraform.io/) installed on your local machine. Due to the recent licensing draw around Terraform, it's recommended to move to [OpenTofo](https://opentofu.org/) at earliest convenience.
   
 - Appropriate AWS credentials (access key, secret key and session token) configured in your environment. AWS_REGION is typically defined in the Terraform config but should be exported to the environment also for use with other utilities such as [aws-cli][https://aws.amazon.com/cli/]. Ideally, the credentials being used are temporary and expire in a reasonable amount of time. This way, any secrets possibly leaked into shell history or system/application logs are unsable after a period of time.
   ``` bash
@@ -27,8 +27,7 @@ Before you get started, ensure you have the following prerequisites:
 
 3. Create or edit the .tfvars file in this directory and define your variables. For example:
 
-hcl
-
+```hcl
 aws_region              = "us-west-2"
 bucket_name             = "my-example-bucket"
 name_tag                = "MyExampleBucket"
