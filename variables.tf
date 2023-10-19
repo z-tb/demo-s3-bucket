@@ -7,24 +7,25 @@ variable "aws_region" {
 variable "bucket_name" {
   description = "The name of the S3 bucket to be created."
   type        = string
+  default     = "default-bucket-name"
 }
 
 variable "name_tag" {
   description = "The 'Name' tag for the S3 bucket."
   type        = string
-  default     = "default_name"
+  default     = "default-name-tag"
 }
 
 variable "owner_tag" {
   description = "The 'Owner' tag for the S3 bucket."
   type        = string
-  default     = "default_owner"
+  default     = "default-owner-tag"
 }
 
 variable "environment_tag" {
   description = "The 'Environment' tag for the S3 bucket."
   type        = string
-  default     = "default_env"
+  default     = "default-env-tag"
 }
 
 variable "block_public_acls" {

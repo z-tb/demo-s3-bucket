@@ -1,8 +1,8 @@
-aws_region      = "us-east-1"
-bucket_name     = "my-example-bucket"
-name_tag        = "MyExampleBucket"
-owner_tag       = "John Doe"
-environment_tag = "development"
+aws_region      = "us-east-2"
+bucket_name     = "my-tfvars-bucket-name"
+name_tag        = "my-tfvars-name-tag"
+owner_tag       = "my-tfvars-owner-tag"
+environment_tag = "my-tfvars-env-tag"
 
 # S3 access
 block_public_acls       = true
