@@ -11,10 +11,10 @@ resource "aws_s3_bucket" "my_bucket" {
 
 # S3 bucket encryption - bucket key and AES
 resource "aws_s3_bucket_server_side_encryption_configuration" "my_s3_bucket_encryption" {
-   bucket      = aws_s3_bucket.my_bucket
+   bucket      = aws_s3_bucket.my_bucket.bucket
 
    rule {
-            bucket_key_enabled   = true
+            bucket_key_enabled   = var.bucket_key_enabled
 
             apply_server_side_encryption_by_default {
                sse_algorithm     = "AES256"
@@ -23,8 +23,5 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "my_s3_bucket_encr
 }
 
 
-# Name, environment, owner (many others)
-# https://engineering.deptagency.com/best-practices-for-terraform-aws-tags
-
-# Name, Environment, Owner, 
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/resource-tagging
+# TODO: Add aws_s3_public_access block - this is now the default but a good exercise
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block

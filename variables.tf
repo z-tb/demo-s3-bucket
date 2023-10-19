@@ -51,3 +51,10 @@ variable "restrict_public_buckets" {
   type        = bool
   default     = true
 }
+
+# default to always use a bucket key for encryption
+variable "bucket_key_enabled" {
+  description = "Set to true to use a bucket key for encryption. The alternative is KMS key which == $$"
+  type        = bool
+  default     = true
+}
