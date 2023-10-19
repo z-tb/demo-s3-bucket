@@ -18,14 +18,14 @@ Before you get started, ensure you have the following prerequisites:
 ## Usage
 
 1. Clone this repository to your local machine:
-   ```bash
-   git clone https://github.com/z-tb/demo-s3-bucket.git
-   ```
+  ```bash
+  git clone https://github.com/z-tb/demo-s3-bucket.git
+  ```
 
 2. Navigate to the demo-s3-bucket directory:
-   ```bash
-   cd demo-s3-bucket
-   ```
+  ```bash
+  cd demo-s3-bucket
+  ```
 
 3. Create or edit the .tfvars file in this directory and define your variables. For example:
   ```hcl
