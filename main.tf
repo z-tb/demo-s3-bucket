@@ -1,3 +1,7 @@
+# 
+# terraform init -var-file="test-env.tfvars"
+# 
+
 resource "aws_s3_bucket" "my_bucket" {
   bucket = var.bucket_name
 
