@@ -1,74 +1,56 @@
-# Terraform AWS S3 Bucket Configuration
+# Terraform AWS S3 Bucket Demo
 
-This repository contains Terraform configuration files for provisioning an Amazon S3 bucket on AWS with various security and access control settings.
+This repository contains Terraform configuration files for provisioning an Amazon S3 bucket on AWS with various security and access control settings. It's intent is to provide a foundation for learning Terraform by provisioning a simple S3 bucket and progressively adding more AWS resources such as resource polices, lambda triggers, IAM policies and data lifecycle tiering.
 
 ## Prerequisites
 
 Before you get started, ensure you have the following prerequisites:
 
-- [Terraform](https://www.terraform.io/) installed on your local machine.
-- Appropriate AWS credentials (access key and secret key) configured in your AWS CLI or environment.
+- [Terraform](https://www.terraform.io/) installed on your local machine. Due to the recent licensing draw around Terraform, it's recommended to move to [OpenTofo][https://opentofu.org/] at earliest convenience.
+  
+- Appropriate AWS credentials (access key, secret key and session token) configured in your environment. AWS_REGION is typically defined in the Terraform config but should be exported to the environment also for use with other utilities such as [aws-cli][https://aws.amazon.com/cli/]. Ideally, the credentials being used are temporary and expire in a reasonable amount of time. This way, any secrets possibly leaked into shell history or system/application logs are unsable after a period of time.
+  ``` bash
+  export AWS_ACCESS_KEY_ID="BEFEQEEWZIF3R1YI42OA"
+  export AWS_SECRET_ACCESS_KEY="to...zKF"
+  export AWS_SESSION_TOKEN="IA30...G4bC515zE="
+  export AWS_REGION="us-east-1"
 
 ## Usage
 
 1. Clone this repository to your local machine:
-
    ```bash
    git clone https://github.com/z-tb/demo-s3-bucket.git
 
-
-# Terraform AWS S3 Bucket Configuration
-
-This repository contains Terraform configuration files for provisioning an Amazon S3 bucket on AWS with various security and access control settings.
-
-## Prerequisites
-
-Before you get started, ensure you have the following prerequisites:
-
-- [Terraform](https://www.terraform.io/) installed on your local machine.
-- Appropriate AWS credentials (access key and secret key) configured in your AWS CLI or environment.
-
-## Usage
-
-1. Clone this repository to your local machine:
-
+2. Navigate to the demo-s3-bucket directory:
    ```bash
-   git clone https://github.com/your-username/terraform-aws-s3-bucket.git
+   cd demo-s3-bucket
 
-    Navigate to the project directory:
-
-    bash
-
-cd terraform-aws-s3-bucket
-
-Create a terraform.tfvars file in this directory and define your variables. For example:
+3. Create or edit the .tfvars file in this directory and define your variables. For example:
 
 hcl
 
-aws_region = "us-west-2"
-bucket_name = "my-example-bucket"
-name_tag = "MyExampleBucket"
-owner_tag = "John Doe"
-environment_tag = "development"
-block_public_acls = true
-block_public_policy = true
-ignore_public_acls = true
+aws_region              = "us-west-2"
+bucket_name             = "my-example-bucket"
+name_tag                = "MyExampleBucket"
+owner_tag               = "John Doe"
+environment_tag         = "development"
+block_public_acls       = true
+block_public_policy     = true
+ignore_public_acls      = true
 restrict_public_buckets = true
-bucket_key_enabled = true
+bucket_key_enabled      = true
 
 Initialize the Terraform configuration:
 
-bash
-
-terraform init
+```bash
+terraform init -vars-file="test-env.tfvars"
 
 Apply the configuration:
+```bash
 
-bash
+    terraform apply -vars-file="test-env.tfvars"
 
-    terraform apply
-
-    Review the changes and confirm with 'yes' when prompted.
+Review the changes and confirm with 'yes' when prompted.
 
 The Terraform configuration will create an S3 bucket with the specified settings.
 Configuration
