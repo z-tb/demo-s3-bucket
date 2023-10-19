@@ -20,13 +20,14 @@ Before you get started, ensure you have the following prerequisites:
 1. Clone this repository to your local machine:
    ```bash
    git clone https://github.com/z-tb/demo-s3-bucket.git
+   ```
 
 2. Navigate to the demo-s3-bucket directory:
    ```bash
    cd demo-s3-bucket
+   ```
 
 3. Create or edit the .tfvars file in this directory and define your variables. For example:
-
   ```hcl
   aws_region              = "us-west-2"
   bucket_name             = "my-example-bucket"
@@ -38,16 +39,17 @@ Before you get started, ensure you have the following prerequisites:
   ignore_public_acls      = true
   restrict_public_buckets = true
   bucket_key_enabled      = true
+  ```
 
 Initialize the Terraform configuration:
-
-```bash
-terraform init -vars-file="test-env.tfvars"
+  ```bash
+  terraform init -vars-file="test-env.tfvars"
+  ```
 
 Apply the configuration:
-```bash
-
-    terraform apply -vars-file="test-env.tfvars"
+  ```bash
+  terraform apply -vars-file="test-env.tfvars"
+  ```
 
 Review the changes and confirm with 'yes' when prompted.
 
