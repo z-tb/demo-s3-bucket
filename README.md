@@ -8,7 +8,7 @@ Before you get started, ensure you have the following prerequisites:
 
 - [Terraform](https://www.terraform.io/) installed on your local machine. Due to the recent licensing draw around Terraform, it's recommended to move to [OpenTofo](https://opentofu.org/) at earliest convenience.
   
-- Appropriate AWS credentials (access key, secret key and session token) configured in your environment. AWS_REGION is typically defined in the Terraform config but should be exported to the environment also for use with other utilities such as [aws-cli][https://aws.amazon.com/cli/]. Ideally, the credentials being used are temporary and expire in a reasonable amount of time. This way, any secrets possibly leaked into shell history or system/application logs are unsable after a period of time.
+- Appropriate AWS credentials (access key, secret key and session token) configured in your environment. AWS_REGION is typically defined in the Terraform config but should be exported to the environment also for use with other utilities such as [aws-cli](https://aws.amazon.com/cli/). Ideally, the credentials being used are temporary and expire in a reasonable amount of time. This way, any secrets possibly leaked into shell history or system/application logs are unsable after a period of time.
   ``` bash
   export AWS_ACCESS_KEY_ID="BEFEQEEWZIF3R1YI42OA"
   export AWS_SECRET_ACCESS_KEY="to...zKF"
@@ -41,12 +41,12 @@ Before you get started, ensure you have the following prerequisites:
   bucket_key_enabled      = true
   ```
 
-Initialize the Terraform configuration:
+4. Initialize the Terraform configuration:
   ```bash
   terraform init -vars-file="test-env.tfvars"
   ```
 
-Apply the configuration:
+5. Apply the configuration:
   ```bash
   terraform apply -vars-file="test-env.tfvars"
   ```
