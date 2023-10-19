@@ -27,17 +27,17 @@ Before you get started, ensure you have the following prerequisites:
 
 3. Create or edit the .tfvars file in this directory and define your variables. For example:
 
-```hcl
-aws_region              = "us-west-2"
-bucket_name             = "my-example-bucket"
-name_tag                = "MyExampleBucket"
-owner_tag               = "John Doe"
-environment_tag         = "development"
-block_public_acls       = true
-block_public_policy     = true
-ignore_public_acls      = true
-restrict_public_buckets = true
-bucket_key_enabled      = true
+  ```hcl
+  aws_region              = "us-west-2"
+  bucket_name             = "my-example-bucket"
+  name_tag                = "MyExampleBucket"
+  owner_tag               = "John Doe"
+  environment_tag         = "development"
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+  bucket_key_enabled      = true
 
 Initialize the Terraform configuration:
 
