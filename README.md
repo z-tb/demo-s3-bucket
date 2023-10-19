@@ -46,7 +46,7 @@ Before you get started, ensure you have the following prerequisites:
   terraform init -vars-file="test-env.tfvars"
   ```
 
-5. Apply the configuration:
+5. Apply the configuration using the same `.tfvars` file:
   ```bash
   terraform apply -vars-file="test-env.tfvars"
   ```
