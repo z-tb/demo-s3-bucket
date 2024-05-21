@@ -1,4 +1,8 @@
 
+locals {
+  # used in multiple places - for lambda function and cloudwatch log group
+  lambda_function_name = "${var.name_tag}-LAMBDA"
+}
 
 # define the path to the zip file that contains the lambda function
 data "archive_file" "lambda_function_zip" {
@@ -10,7 +14,11 @@ data "archive_file" "lambda_function_zip" {
 
 # Define the CloudWatch Log Group with retention policy to something reasonable to manage storage costs
 resource "aws_cloudwatch_log_group" "lambda_logs" {
-  name              = "${var.name_tag}-LOGS"
+
+  # the name of the log group is created by lambda and always uses the name of the lambda function.
+  # if you want to set retention, you have to use the log group name geneated by AWS
+  # https://stackoverflow.com/a/59060348
+  name              = "/aws/lambda/${local.lambda_function_name}"
   retention_in_days = var.log_retention_in_days  # Set retention policy to something reasonable
 
   tags = {
@@ -36,9 +44,9 @@ resource "null_resource" "generate_lambda_zip" {
 # Define the Lambda function
 resource "aws_lambda_function" "my_lambda_function" {
   # Use the ZIP file created by the archive_file data source
-  description       = "Runs periodically via CloudWatch to monitor costs. Sends alerts via Slack. Configurable threshold is in ParameterStore"
+  description       = var.lambda_description
   filename          = data.archive_file.lambda_function_zip.output_path
-  function_name     = "${var.name_tag}-LAMDA"
+  function_name     = local.lambda_function_name
   role              = aws_iam_role.lambda_role.arn
   handler           = "${var.name_tag}.lambda_handler"
   source_code_hash  = data.archive_file.lambda_function_zip.output_base64sha256  #<-- monitor the source python script for changes
@@ -200,4 +208,52 @@ resource "aws_iam_role" "lambda_role" {
     Owner       = var.owner_tag
     Environment = var.environment_tag
   }
+}
+
+
+resource "aws_cloudwatch_event_rule" "lambda_schedule_rule" {
+  name                = "${var.name_tag}-CW-RULE"
+  description         = "Rule to schedule a Lambda function"
+  schedule_expression = "rate(5 minutes)"
+  
+
+  // Optional: Uncomment the following block if you want to filter events
+  # event_pattern = <<PATTERN
+  # {
+  #   "source": ["aws.ec2"],
+  #   "detail": {
+  #     "eventName": ["RunInstances"]
+  #   }
+  # }
+  # PATTERN
+  tags = {
+    Name        = var.name_tag
+    Owner       = var.owner_tag
+    Environment = var.environment_tag
+  }    
+}
+
+resource "aws_cloudwatch_event_target" "lambda_target" {
+  rule      = aws_cloudwatch_event_rule.lambda_schedule_rule.name
+  target_id = "LambdaTarget"
+  arn       = aws_lambda_function.my_lambda_function.arn
+
+
+  // Optional: Uncomment the following block if you want to pass custom parameters to Lambda
+  input = <<JSON
+  {
+    "Message": "Launched from CloudWatch!"
+   }
+  JSON
+  
+}
+
+# needed to allow CloudWatch Events to call the Lambda function
+resource "aws_lambda_permission" "allow_cloudwatch" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.my_lambda_function.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_schedule_rule.arn
+  
 }

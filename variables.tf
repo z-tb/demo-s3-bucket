@@ -79,3 +79,9 @@ variable "log_retention_in_days" {
   type        = number
   default     = 7
 }
+
+variable "lambda_description" {
+  description = "description of the lambda function"
+  type        = string
+  default     = "default-lambda-description"
+}

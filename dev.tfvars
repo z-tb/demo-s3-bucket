@@ -1,11 +1,12 @@
 aws_region          = "us-west-2"
-bucket_name         = "s3-demo-bucket-30-itpc"
+bucket_name         = "s3-demo-bucket-27-itpc"
 name_tag            = "s3-bucket-demo"  # python src file needs to be named this as well
 owner_tag           = "tmb"
 environment_tag     = "itpc"
 lambda_output_path  = "lambda_functions/lambda_aws.zip"
 lambda_source_dir   = "lambda_functions/src"
 lambda_runtime      = "python3.8" 
+lambda_description  = "s3 bucket demo creates a file in a bucket"
 
 # S3 access
 block_public_acls       = true
