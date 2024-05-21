@@ -14,7 +14,8 @@ Before you get started, ensure you have the following prerequisites:
   export AWS_SECRET_ACCESS_KEY="to...zKF"
   export AWS_SESSION_TOKEN="IA30...G4bC515zE="
   export AWS_REGION="us-east-1"
-
+  ```
+  
 ## Usage
 
 1. Clone this repository to your local machine:
