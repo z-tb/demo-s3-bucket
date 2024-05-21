@@ -6,7 +6,7 @@ This repository contains Terraform configuration files for provisioning an Amazo
 
 Before you get started, ensure you have the following prerequisites:
 
-- [Terraform](https://www.terraform.io/) installed on your local machine. Due to the recent licensing draw around Terraform, it's recommended to move to [OpenTofo](https://opentofu.org/) at earliest convenience.
+- [Terraform](https://www.terraform.io/) installed on your local machine. Due to the recent licensing issues around Terraform, it may be in your interest to switch to [OpenTofo](https://opentofu.org/) at earliest convenience.
   
 - Appropriate AWS credentials (access key, secret key and session token) configured in your environment. AWS_REGION is typically defined in the Terraform config but should be exported to the environment also for use with other utilities such as [aws-cli](https://aws.amazon.com/cli/). Ideally, the credentials being used are temporary and expire in a reasonable amount of time. This way, any secrets possibly leaked into shell history or system/application logs are unsable after a period of time.
   ``` bash
@@ -43,12 +43,12 @@ Before you get started, ensure you have the following prerequisites:
 
 4. Initialize the Terraform configuration:
   ```bash
-  terraform init -vars-file="test-env.tfvars"
+  terraform init -vars-file="dev.tfvars"
   ```
 
 5. Apply the configuration using the same `.tfvars` file:
   ```bash
-  terraform apply -vars-file="test-env.tfvars"
+  terraform apply -vars-file="dev.tfvars"
   ```
 
 Review the changes and confirm with 'yes' when prompted.
@@ -67,11 +67,72 @@ Configuration
     restrict_public_buckets: Set to true to restrict the creation of public buckets.
     bucket_key_enabled: Set to true to use a bucket key for encryption; the alternative is using a KMS key for encryption.
 
-License
+
+### Makefile Usage
+The Makefile provides a set of convenient commands for managing Terraform configurations for different environments. It includes tasks for initializing, planning, applying, and destroying resources.  It is configured to use OpenTofu by default so if you have Terraform insteam, change the `TF` variable.
+
+The following commands/targets are in the Makefile:
+
+#### Initialize Terraform
+
+```
+make init
+```
+
+This command initializes Terraform using the var-file corresponding to the specified environment (dev or prod).
+
+#### Reconfigure Terraform
+
+```
+make reconfig
+```
+
+This command reconfigures Terraform setup, initializing it with reconfiguration using the var-file corresponding to the specified environment.
+
+#### Plan Terraform Changes
+
+```
+make plan
+```
+
+This command generates an execution plan for Terraform changes using the var-file corresponding to the specified environment.
+
+#### Apply Terraform Changes
+
+```
+make apply
+```
+
+This command applies Terraform changes using the var-file corresponding to the specified environment.
+
+#### Destroy Terraform Resources
+
+```
+make destroy
+```
+
+This command destroys Terraform-managed infrastructure using the var-file corresponding to the specified environment.
+
+### Environment Variables
+
+- **TF**: Set to "tofu", representing the Terraform executable.
+- **ENV**: Set to "dev" by default, can be overridden to "prod" or any other environment.
+
+### Colorization
+
+The output of each command is colorized for better readability:
+- **Green**: Indicates a dev environment.
+- **Red**: Indicates a non-dev environment.
+- **Reset**: Resets color settings after the message.
+
+### Vim Modeline
+
+The Vim modeline at the end of the file provides syntax highlighting and indentation settings for Vim text editor.
+
+```
+# Vim modeline
+# vim: syntax=make ts=8 sw=8 noet
+```
+## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
-
-csharp
-
-
-You can now copy and paste this code into your README.md file in your GitHub repository
