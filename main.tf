@@ -1,7 +1,3 @@
-# 
-# terraform init -var-file="test-env.tfvars"
-# 
-
 resource "aws_s3_bucket" "my_bucket" {
   bucket = var.bucket_name
 
@@ -25,7 +21,3 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "my_s3_bucket_encr
             }
    }
 }
-
-
-# TODO: Add aws_s3_public_access block - this is now the default but a good exercise
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block

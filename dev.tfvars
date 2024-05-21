@@ -1,8 +1,8 @@
 aws_region      = "us-east-1"
-bucket_name     = "s3-demo-bucket-huffy-duck"  # An Amazon S3 bucket name must bez globally unique
-name_tag        = "s3-bucket-demo"
+bucket_name     = "s3-demo-bucket-30-itpc"
+name_tag        = "s3-bucket-demo-dev"
 owner_tag       = "tmb"
-environment_tag = "testing"
+environment_tag = "itpc"
 
 # S3 access
 block_public_acls       = true
