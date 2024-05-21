@@ -75,7 +75,7 @@ The following commands/targets are in the Makefile:
 
 #### Initialize Terraform
 
-```
+```bash
 make init
 ```
 
@@ -83,7 +83,7 @@ This command initializes Terraform using the var-file corresponding to the speci
 
 #### Reconfigure Terraform
 
-```
+```bash
 make reconfig
 ```
 
@@ -91,7 +91,7 @@ This command reconfigures Terraform setup, initializing it with reconfiguration 
 
 #### Plan Terraform Changes
 
-```
+```bash
 make plan
 ```
 
@@ -99,7 +99,7 @@ This command generates an execution plan for Terraform changes using the var-fil
 
 #### Apply Terraform Changes
 
-```
+```bash
 make apply
 ```
 
@@ -107,7 +107,7 @@ This command applies Terraform changes using the var-file corresponding to the s
 
 #### Destroy Terraform Resources
 
-```
+```bash
 make destroy
 ```
 
@@ -129,7 +129,7 @@ The output of each command is colorized for better readability:
 
 The Vim modeline at the end of the file provides syntax highlighting and indentation settings for Vim text editor.
 
-```
+```bash
 # Vim modeline
 # vim: syntax=make ts=8 sw=8 noet
 ```
