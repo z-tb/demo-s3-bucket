@@ -58,3 +58,29 @@ variable "bucket_key_enabled" {
   type        = bool
   default     = true
 }
+
+variable "lambda_filename" {
+  description = "The filename of the lambda function in the lambda_functions/src/ directory."
+  type        = string
+}
+
+variable "lambda_source_dir" {
+  description = "the directory containing the lambda function source code."
+  type        = string
+}
+
+variable "lambda_output_path" {
+  description = "where to place the zip file of the lambda function."
+  type        = string
+}
+
+variable "lambda_runtime" {
+  description = "the runtime interpreter for the lambda function - ruby2.7, nodejs12.x, python3.8, etc, etc"
+  type        = string
+}
+
+variable "log_retention_in_days" {
+  description = "number of days to keep log group cloudwatch logs"
+  type        = number
+  default     = 7
+}

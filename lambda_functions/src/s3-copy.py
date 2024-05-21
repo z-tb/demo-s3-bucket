@@ -29,6 +29,5 @@ def lambda_handler(event, context):
     s3.put_object(Body=f"Hello from {mybucket}" , Bucket=mybucket, Key='bucketlist.txt')
     
 
-
 if os.environ.get('DEBUG_MODE') == 'true':
     lambda_handler(event=None, context=None)
