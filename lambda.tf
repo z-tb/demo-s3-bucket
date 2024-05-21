@@ -24,11 +24,11 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
 # re-zip the file if changed
 resource "null_resource" "generate_lambda_zip" {
   triggers = {
-    source_file_hash = filebase64sha256("${var.lambda_source_dir}/${var.lambda_filename}")
+    source_file_hash = filebase64sha256("${var.lambda_source_dir}/${var.name_tag}.py")
   }
 
   provisioner "local-exec" {
-    command = "cd ${var.lambda_source_dir} && zip -r ../../${var.lambda_output_path} ${var.lambda_filename}"
+    command = "cd ${var.lambda_source_dir} && zip -r ../../${var.lambda_output_path} ${var.name_tag}.py"
   }
 }
 
@@ -43,7 +43,7 @@ resource "aws_lambda_function" "my_lambda_function" {
   handler           = "${var.name_tag}.lambda_handler"
   source_code_hash  = data.archive_file.lambda_function_zip.output_base64sha256  #<-- monitor the source python script for changes
   runtime           = var.lambda_runtime 
-  
+
   # Make sure the log group (and IAM role?) has been created first, or you'll get two -- one you want, and the other is a default
   depends_on = [
     aws_iam_role.lambda_role,
@@ -88,7 +88,7 @@ resource "aws_iam_role" "lambda_role" {
   # Attach a policy that allows writing to CloudWatch Logs
   # https://registry.terraform.io/providers/hashicorp/aws/3.56.0/docs/resources/lambda_function
   inline_policy {
-    name = "${var.name_tag}-CW-POL"
+    name = "${var.name_tag}-LOG-POL"
 
     policy = jsonencode({
       Version   = "2012-10-17",
@@ -99,6 +99,37 @@ resource "aws_iam_role" "lambda_role" {
                       "logs:PutLogEvents"],
           Effect   = "Allow",
           Resource = "arn:aws:logs:*:*:*"
+        }
+      ]
+    })
+  }
+
+  # add an inline policy that allows listing all s3 buckets and reading/writing to the specific var.bucket_name bucket
+  inline_policy {
+    name = "${var.name_tag}-S3-POL"
+
+    policy = jsonencode({
+      Version   = "2012-10-17",
+      Statement = [
+        {
+          Action   = ["S3:ListAllMyBuckets"]
+
+          Effect   = "Allow",
+          Resource = ["arn:aws:s3:::*"]
+        },
+        {
+          Action   = ["s3:GetBucketLocation",
+                      "s3:ListBucket",
+                      "S3:ListAllMyBuckets",
+                      "s3:ListBucketMultipartUploads",
+                      "s3:ListMultipartUploadParts",
+                      "s3:PutObject",
+                      "s3:GetObject",
+                      "s3:DeleteObject",
+                      "s3:AbortMultipartUpload"],
+          Effect   = "Allow",
+          Resource = ["arn:aws:s3:::${var.bucket_name}",
+                      "arn:aws:s3:::${var.bucket_name}/*"]
         }
       ]
     })
