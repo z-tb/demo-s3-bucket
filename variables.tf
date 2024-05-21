@@ -59,11 +59,6 @@ variable "bucket_key_enabled" {
   default     = true
 }
 
-variable "lambda_filename" {
-  description = "The filename of the lambda function in the lambda_functions/src/ directory."
-  type        = string
-}
-
 variable "lambda_source_dir" {
   description = "the directory containing the lambda function source code."
   type        = string
