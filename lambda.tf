@@ -240,12 +240,15 @@ resource "aws_cloudwatch_event_target" "lambda_target" {
 
 
   // Optional: Uncomment the following block if you want to pass custom parameters to Lambda
-  input = <<JSON
-  {
-    "Message": "Launched from CloudWatch!"
-   }
-  JSON
+  input = jsonencode(
+    {
+      Message    = "CloudWatch Launch!"
+      Name       = var.name_tag
+      BucketName = var.bucket_name
+    })
   
+
+  #notags
 }
 
 # needed to allow CloudWatch Events to call the Lambda function
@@ -256,4 +259,5 @@ resource "aws_lambda_permission" "allow_cloudwatch" {
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.lambda_schedule_rule.arn
   
+  #notags
 }
