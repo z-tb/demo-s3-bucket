@@ -15,12 +15,15 @@ logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
     
-    # check if the event was triggered by a cloudwatch event
-    TODO: doesn't seem to be catching the event
-    if event and event.get('source') == 'aws.events':
-        logger.info ("Starting the lambda function from CloudWatch! Event: " + json.dumps(event))        
+    # check if the event was triggered by the custom cloudwatch event
+    if event is not None:
+        logger.info ("The lambda function was passed an event: " + str(event))
+        
+        if event.get('Message') == "CloudWatch Launch!":
+            logger.info ("Bucket from CloudWatch: " + event.get('Name'))
+            logger.info ("Name tag from CloudWatch: " + event.get('BucketName'))
     else:
-        logger.info ("starting the lambda function")
+        logger.info ("starting the lambda function with no event parameters passed")
     
     # without a bucket to work with, we can't do anything in this lambda
     if os.environ.get('S3_BUCKET_NAME') is None:
@@ -44,4 +47,12 @@ def lambda_handler(event, context):
     
 
 if os.environ.get('DEBUG_MODE') == 'true':
-    lambda_handler(event=None, context=None)
+    event = None
+    
+    #event = {
+    #    "Message": "CloudWatch Launch!",
+    #    "Name": "lambda_demo",
+    #    "BucketName": "another_bucket"
+    #}
+    
+    lambda_handler(event, context=None)
