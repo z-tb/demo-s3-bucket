@@ -1,6 +1,6 @@
 # Terraform AWS S3 Bucket Demo
 
-This repository contains Terraform configuration files for provisioning an Amazon S3 bucket on AWS with various security and access control settings. Its intent is to provide a foundation for learning Terraform by provisioning a simple S3 bucket and progressively adding more AWS resources such as resource policies, lambda triggers, IAM policies, and data lifecycle tiering.
+This repository contains Terraform configuration files for provisioning Amazon AWS infrastructure with an S3 bucket, Lambda function, Cloudwatch event and the various security and access controls needed for the resource to interact with each other. The intent is to provide a foundation to demo how the various pieces are applied through Terraform.
 
 ## Prerequisites
 
