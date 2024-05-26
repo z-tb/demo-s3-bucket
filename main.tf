@@ -1,3 +1,24 @@
+/* 
+This terraform code provisions a Lambda, S3 bucket, and 
+Cloudwatch Event Trigger which runs the Lambda every 5 mins
+
+   ┌────────┐              ┌─────────┐   
+   │        │              │         │   
+   │ LAMBDA │   FILE       │S3 BUCKET│   
+   │        ├─────────────►│         │   
+   │        │              │         │   
+   └──┬─────┘              └─────────┘   
+      │                                  
+      │                                  
+      │                                  
+   ┌──┴────────┐                         
+   │5 MIN      │                         
+   │CLOUDWATCH │                         
+   │EVENT      │                         
+   │TRIGGER    │                         
+   └───────────┘ 
+*/
+
 resource "aws_s3_bucket" "my_bucket" {
   bucket = var.bucket_name
 
