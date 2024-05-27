@@ -8,6 +8,18 @@ import datetime
 import logging
 import time
 
+"""
+This Lambda function just creates a file in an S3 bucket using the current
+time as the filename.
+   ┌────────┐              ┌─────────┐   
+   │        │              │         │   
+   │ LAMBDA │   FILE       │S3 BUCKET│   
+   │        ├─────────────►│         │   
+   │        │              │         │   
+   └────────┘              └─────────┘   
+                       
+"""                                         
+                                         
 # Configure logging with global scope for all functions
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
