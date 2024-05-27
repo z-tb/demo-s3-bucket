@@ -9,7 +9,7 @@ import logging
 import time
 
 """
-This Lambda function just creates a file in an S3 bucket using the current
+This Lambda function will create a file in an S3 bucket using the current
 time as the filename.
    ┌────────┐              ┌─────────┐   
    │        │              │         │   
