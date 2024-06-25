@@ -21,12 +21,7 @@ Cloudwatch Event Trigger which runs the Lambda every 5 mins
 
 resource "aws_s3_bucket" "my_bucket" {
   bucket = var.bucket_name
-
-  tags = {
-    Name        = var.name_tag
-    Owner       = var.owner_tag
-    Environment = var.environment_tag
-  }
+  tags = var.tags
 }  
   
 

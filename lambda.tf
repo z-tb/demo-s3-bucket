@@ -1,7 +1,7 @@
 
 locals {
   # used in multiple places - for lambda function and cloudwatch log group
-  lambda_function_name = "${var.name_tag}-LAMBDA"
+  lambda_function_name = "${var.tags.Name}-LAMBDA"
 }
 
 # define the path to the zip file that contains the lambda function
@@ -21,22 +21,18 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
   name              = "/aws/lambda/${local.lambda_function_name}"
   retention_in_days = var.log_retention_in_days  # Set retention policy to something reasonable
 
-  tags = {
-    Name        = var.name_tag
-    Owner       = var.owner_tag
-    Environment = var.environment_tag
-  }
+  tags = var.tags
 }
 
 
 # re-zip the file if changed
 resource "null_resource" "generate_lambda_zip" {
   triggers = {
-    source_file_hash = filebase64sha256("${var.lambda_source_dir}/${var.name_tag}.py")
+    source_file_hash = filebase64sha256("${var.lambda_source_dir}/${var.tags.Name}.py")
   }
 
   provisioner "local-exec" {
-    command = "cd ${var.lambda_source_dir} && zip -r ../../${var.lambda_output_path} ${var.name_tag}.py"
+    command = "cd ${var.lambda_source_dir} && zip -r ../../${var.lambda_output_path} ${var.tags.Name}.py"
   }
 }
 
@@ -48,7 +44,7 @@ resource "aws_lambda_function" "my_lambda_function" {
   filename          = data.archive_file.lambda_function_zip.output_path
   function_name     = local.lambda_function_name
   role              = aws_iam_role.lambda_role.arn
-  handler           = "${var.name_tag}.lambda_handler"
+  handler           = "${var.tags.Name}.lambda_handler"
   source_code_hash  = data.archive_file.lambda_function_zip.output_base64sha256  #<-- monitor the source python script for changes
   runtime           = var.lambda_runtime 
 
@@ -66,18 +62,14 @@ resource "aws_lambda_function" "my_lambda_function" {
   }
 
   # add some handy tags
-  tags = {
-    Name        = var.name_tag
-    Owner       = var.owner_tag
-    Environment = var.environment_tag
-  }
+  tags = var.tags
 }
 
 
 
 # Define the Lambda IAM role
 resource "aws_iam_role" "lambda_role" {
-  name = "${var.name_tag}-LAM-ROLE"
+  name = "${var.tags.Name}-LAM-ROLE"
 
   # Allow Lambda to use AssumeRole
   assume_role_policy = jsonencode({
@@ -96,7 +88,7 @@ resource "aws_iam_role" "lambda_role" {
   # Attach a policy that allows writing to CloudWatch Logs
   # https://registry.terraform.io/providers/hashicorp/aws/3.56.0/docs/resources/lambda_function
   inline_policy {
-    name = "${var.name_tag}-LOG-POL"
+    name = "${var.tags.Name}-LOG-POL"
 
     policy = jsonencode({
       Version   = "2012-10-17",
@@ -114,7 +106,7 @@ resource "aws_iam_role" "lambda_role" {
 
   # add an inline policy that allows listing all s3 buckets and reading/writing to the specific var.bucket_name bucket
   inline_policy {
-    name = "${var.name_tag}-S3-POL"
+    name = "${var.tags.Name}-S3-POL"
 
     policy = jsonencode({
       Version   = "2012-10-17",
@@ -146,7 +138,7 @@ resource "aws_iam_role" "lambda_role" {
   /* # Allow access to the specified Secrets Manager secret
   # follow Resource with "*" because the ARN for the secret has a few AWS generated characters after the actual name
   inline_policy {
-    name = "${var.name_tag}-SM-POL"
+    name = "${var.tags.Name}-SM-POL"
 
     policy = jsonencode({
       Version   = "2012-10-17",
@@ -163,7 +155,7 @@ resource "aws_iam_role" "lambda_role" {
   
   /* # Allow access to SSM Parameter Store with a specific prefix
   inline_policy {
-    name = "${var.name_tag}-SSM-POL"
+    name = "${var.tags.Name}-SSM-POL"
 
     policy = jsonencode({
       Version = "2012-10-17",
@@ -188,7 +180,7 @@ resource "aws_iam_role" "lambda_role" {
   /* # Cost Usage/Explorer
   # Resource needs to be "*" here as that is all that is allowed in the policy editor
   inline_policy {
-    name = "${var.name_tag}-CE-POL"
+    name = "${var.tags.Name}-CE-POL"
 
     policy = jsonencode({
       Version = "2012-10-17",
@@ -203,16 +195,12 @@ resource "aws_iam_role" "lambda_role" {
   } */
     
 
-  tags = {
-    Name        = var.name_tag
-    Owner       = var.owner_tag
-    Environment = var.environment_tag
-  }
+  tags = var.tags
 }
 
 
 resource "aws_cloudwatch_event_rule" "lambda_schedule_rule" {
-  name                = "${var.name_tag}-CW-RULE"
+  name                = "${var.tags.Name}-CW-RULE"
   description         = "Rule to schedule a Lambda function"
   schedule_expression = "rate(5 minutes)"
   
@@ -226,11 +214,7 @@ resource "aws_cloudwatch_event_rule" "lambda_schedule_rule" {
   #   }
   # }
   # PATTERN
-  tags = {
-    Name        = var.name_tag
-    Owner       = var.owner_tag
-    Environment = var.environment_tag
-  }    
+  tags = var.tags
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target" {
@@ -243,7 +227,7 @@ resource "aws_cloudwatch_event_target" "lambda_target" {
   input = jsonencode(
     {
       Message    = "CloudWatch Launch!"
-      Name       = var.name_tag
+      Name       = var.tags.Name
       BucketName = var.bucket_name
     })
   

@@ -85,3 +85,62 @@ variable "lambda_description" {
   type        = string
   default     = "default-lambda-description"
 }
+
+#--- EC2 variables
+variable "ec2_ami_id" {
+  description = "The ID of the AMI to use for the EC2 instance."
+  type        = string
+}
+
+variable "ec2_instance_type" {
+  description = "value of the EC2 instance type."
+  type        = string
+}
+
+variable "ec2_availability_zone" {
+  description = "value of the EC2 instance availability zone."
+  type        = string
+}
+
+variable "tags" {
+  description = "A map of tags to add to all resources."
+  type        = map(string)
+
+  default     = {
+    Project = "NotSure"
+    Owner   = "NotSure"
+    Name    = "NotSure"
+    Environment = "undefined"
+  }
+}
+
+variable "allowed_subnets" {
+  description = "List of allowed subnets for vpc resources"
+  type    = list(string)
+  default = ["192.168.1.0/24"]
+}
+
+#--- VPC variables
+variable "vpc_cidr_block" {
+  description = "CIDR block for the VPC"
+  default     = "10.1.0.0/16"
+}
+
+variable "public_subnet_cidr_blocks" {
+  description = "CIDR blocks for public subnets"
+  type        = list(string)
+  default     = ["10.1.101.0/24", "10.1.102.0/24", "10.1.103.0/24"]  # Adjust CIDR blocks as needed
+}
+
+variable "private_subnet_cidr_blocks" {
+  description = "CIDR blocks for private subnets"
+  type        = list(string)
+  default     = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]  # Adjust CIDR blocks as needed
+}
+
+# List of availability zones
+variable "availability_zones" {
+  description = "List of availability zones for subnets"
+  default     = ["us-west-2a", "us-west-2b", "us-west-2c"]
+}
+
