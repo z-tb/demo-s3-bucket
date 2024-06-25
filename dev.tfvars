@@ -10,7 +10,7 @@ tags = {
 }
 
 # allowed subnets
-allowed_subnets     = ["144.92.0.0/16"]
+allowed_subnets     = ["0.0.0.0"]
 
 lambda_output_path  = "lambda_functions/lambda_aws.zip"
 lambda_source_dir   = "lambda_functions/src"

@@ -1,7 +1,27 @@
-# Terraform AWS S3 Bucket Demo
+# Terraform AWS S3 Bucket Demo with EC2 and VPC
 
-This repository contains Terraform configuration files for provisioning Amazon AWS infrastructure with an S3 bucket, Lambda function, Cloudwatch event and the various security and access controls needed for the resource to interact with each other. The intent is to provide a foundation to demo how the various pieces are applied through Terraform.
+Building on the previous S3 Bucket demo branch, this branch creates a Virtual Private Cloud (VPC) and associated network 
+resources in AWS. The purpose is to set up a secure and scalable network infrastructure for deploying applications.
 
+Additional Resources Created:
+    VPC: A logically isolated section of the AWS cloud.
+    Internet Gateway: Allows communication between the VPC and the internet.
+    Public Subnets: Subnets with direct route to the internet gateway.
+    Private Subnets: Subnets without direct internet access, for enhanced security.
+    NAT Gateways: Allow private subnet resources to access the internet while remaining private.
+    Elastic IPs: Static public IP addresses for the NAT Gateways.
+    Route Tables: Define routing rules for subnets.
+
+Benefits
+    Secure deployment of public-facing and private resources.
+    High availability across multiple Availability Zones.
+    Controlled internet access for private resources.
+
+
+Note
+The EC2 instance will be launched in one of the existing public subnets indicated by the chosen availability zone. To ensure that the EC2 instance is launched in the same Availability Zone (AZ) as the specified public subnet, the aws_subnet data source is used to find the correct subnet based on the ec2_availability_zone variable.
+
+Be sure to regenerate an ED25519 ssh key (see the ec2.tf) so you can ssh into your ec2.
 ## Prerequisites
 
 Before you get started, ensure you have the following prerequisites:
