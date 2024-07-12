@@ -144,3 +144,8 @@ variable "availability_zones" {
   default     = ["us-west-2a", "us-west-2b", "us-west-2c"]
 }
 
+# ssh pubkey used for ec2 access
+variable "ec2_ssh_public_key" {
+  description = "ssh public key for ec2 access"
+  type = string
+}

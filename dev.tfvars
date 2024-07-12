@@ -28,3 +28,4 @@ restrict_public_buckets = true
 ec2_ami_id              = "ami-0cf2b4e024cdb6960"
 ec2_instance_type       = "t2.micro"
 ec2_availability_zone   = "us-west-2c"
+ec2_ssh_public_key      = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINbUFKGxzkTOWswo7TSw3PVu8C6HvJHuDYlmBSHVu0Wu your_email@example.com"

@@ -58,7 +58,7 @@ resource "aws_security_group" "ec2_sg" {
 
 resource "aws_key_pair" "this_key_pair" {
   key_name   = "my-ec2-key"
-  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINbUFKGxzkTOWswo7TSw3PVu8C6HvJHuDYlmBSHVu0Wu your_email@example.com"
+  public_key = var.ec2_ssh_public_key
 
 }
 
@@ -69,6 +69,8 @@ data "aws_subnet" "selected" {
     name   = "tag:Name"
     values = ["pub-subnet-${var.ec2_availability_zone}"]
   }
+
+  depends_on = [ aws_subnet.public_subnet ]
 }
 
 # Create an EC2 instance in the Public Subnet/AZ specified in `ec2_availability_zone`
@@ -77,9 +79,10 @@ resource "aws_instance" "this_ec2_instance" {
   instance_type     = var.ec2_instance_type
   subnet_id         = data.aws_subnet.selected.id
   security_groups   = [aws_security_group.ec2_sg.id]
-  availability_zone = var.ec2_availability_zone       # make sure to use the same AZ as in public_subnet[0]
+  availability_zone = var.ec2_availability_zone
   key_name          = aws_key_pair.this_key_pair.key_name
   tags              = var.tags
+
 }
 
 # Output the public IP address of the instance
