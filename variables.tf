@@ -200,3 +200,19 @@ variable postgres_credentials_name {
   description = "The name of the secret containing the PostgreSQL credentials"
   type        = string
 }
+
+# fargate/alb addition
+variable "ecr_repository_name" {
+  description = "The name of the ECR repository"
+  type        = string
+}
+
+variable "ecs_cluster_name" {
+  description = "The name of the ECS cluster"
+  type        = string
+}
+
+variable "container_name" {
+  description = "The name of the container to spin up on ECS"
+  type        = string
+}

@@ -39,3 +39,8 @@ instance_class         = "db.t3.micro"
 db_name                = "mydatabase"
 parameter_group_name   = "default.postgres13"
 postgres_credentials_name = "postgres-credentials"  # this needs to match the aws cli command in rds.tf
+
+# ecs/ecr/alb
+ecs_cluster_name = "my-ecs-cluster"
+ecr_repository_name = "my-ecr-repository"
+container_name = "my-ecr-container"
