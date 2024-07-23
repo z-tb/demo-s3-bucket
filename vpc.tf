@@ -33,7 +33,7 @@ resource "aws_vpc" "this_vpc" {
 }
 
 # Create an Internet Gateway
-resource "aws_internet_gateway" "this_igw" {
+resource "aws_internet_gateway" "public_igw" {
   vpc_id = aws_vpc.this_vpc.id
 
   tags = var.tags
@@ -70,6 +70,20 @@ resource "aws_subnet" "private_subnet" {
 }
 
 
+# Create a Database Subnet
+resource "aws_subnet" "database_subnet" {
+  count             = length(var.availability_zones)
+  vpc_id            = aws_vpc.this_vpc.id
+  cidr_block        = var.database_subnet_cidr_blocks[count.index]
+  availability_zone = var.availability_zones[count.index]
+
+  tags = merge(var.tags, {
+    Name = "db-subnet-${var.availability_zones[count.index]}"
+    Tier = "database"
+  })
+}
+
+
 # Create Elastic IPs for NAT Gateways
 resource "aws_eip" "nat_eip" {
   count  = length(var.availability_zones)
@@ -79,7 +93,7 @@ resource "aws_eip" "nat_eip" {
 
 
 # Create a NAT Gateway in each AZ
-resource "aws_nat_gateway" "this_nat_gateway" {
+resource "aws_nat_gateway" "private_ngw" {
   count         = length(var.availability_zones)
   allocation_id = aws_eip.nat_eip[count.index].id
   subnet_id     = aws_subnet.public_subnet[count.index].id
@@ -97,7 +111,7 @@ resource "aws_route_table" "private_route_table" {
 
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.this_nat_gateway[count.index].id
+    nat_gateway_id = aws_nat_gateway.private_ngw[count.index].id
   }
 
   tags = merge(var.tags, {
@@ -107,22 +121,24 @@ resource "aws_route_table" "private_route_table" {
 
 # Create a Route Table for the Public Subnet
 resource "aws_route_table" "public_route_table" {
+  count  = length(var.availability_zones)
   vpc_id = aws_vpc.this_vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.this_igw.id
+    gateway_id = aws_internet_gateway.public_igw.id
   }
 
-  tags = var.tags
+  tags = merge(var.tags, {
+    Name = "public-rt-${var.availability_zones[count.index]}"
+  })
 }
-
 
 # Create Route Table Associations for Public Subnets
 resource "aws_route_table_association" "public_subnet_association" {
   count        = length(var.availability_zones)
   subnet_id    = aws_subnet.public_subnet[count.index].id
-  route_table_id = aws_route_table.public_route_table.id
+  route_table_id = aws_route_table.public_route_table[count.index].id
 }
 
 # Create Route Table Associations for Private Subnets
@@ -130,4 +146,11 @@ resource "aws_route_table_association" "private_subnet_association" {
   count          = length(var.availability_zones)
   subnet_id      = aws_subnet.private_subnet[count.index].id
   route_table_id = aws_route_table.private_route_table[count.index].id
+}
+
+# Create Route Table Associations for Database Subnets
+resource "aws_route_table_association" "database_subnet_association" {
+  count          = length(var.availability_zones)
+  subnet_id      = aws_subnet.database_subnet[count.index].id
+  route_table_id = aws_route_table.private_route_table[count.index].id  # only private resources should be able to access the database
 }

@@ -129,13 +129,19 @@ variable "vpc_cidr_block" {
 variable "public_subnet_cidr_blocks" {
   description = "CIDR blocks for public subnets"
   type        = list(string)
-  default     = ["10.1.101.0/24", "10.1.102.0/24", "10.1.103.0/24"]  # Adjust CIDR blocks as needed
+  default     = ["10.1.101.0/24", "10.1.102.0/24", "10.1.103.0/24"]
 }
 
 variable "private_subnet_cidr_blocks" {
   description = "CIDR blocks for private subnets"
   type        = list(string)
-  default     = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]  # Adjust CIDR blocks as needed
+  default     = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]
+}
+
+variable "database_subnet_cidr_blocks" {
+  description = "CIDR blocks for database subnet"
+  type        = list(string)
+  default     = ["10.1.4.0/24", "10.1.5.0/24", "10.1.6.0/24"] 
 }
 
 # List of availability zones
@@ -148,4 +154,49 @@ variable "availability_zones" {
 variable "ec2_ssh_public_key" {
   description = "ssh public key for ec2 access"
   type = string
+}
+
+
+# rds variables 
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance
+variable "db_instance_identifier" {
+  description = "Identifier for the PostgreSQL RDS instance"
+  type        = string
+}
+
+variable "allocated_storage" {
+  description = "The amount of allocated storage in gigabytes"
+  type        = number
+  default     = 20
+}
+
+variable "storage_type" {
+  description = "The storage type for the PostgreSQL RDS instance"
+  type        = string
+  default     = "gp2"
+}
+
+variable "engine_version" {
+  description = "The version of the PostgreSQL engine"
+  type        = string
+}
+
+variable "instance_class" {
+  description = "The instance type for the PostgreSQL RDS instance"
+  type        = string
+}
+
+variable "db_name" {
+  description = "The name of the PostgreSQL database"
+  type        = string
+}
+
+variable "parameter_group_name" {
+  description = "The name of the parameter group to associate with the PostgreSQL RDS instance"
+  type        = string
+}
+
+variable postgres_credentials_name {
+  description = "The name of the secret containing the PostgreSQL credentials"
+  type        = string
 }
