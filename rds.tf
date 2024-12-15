@@ -143,6 +143,7 @@ resource "aws_security_group" "postgres_sg" {
 }
 
 # Output to display the connection details (optional)
+
 output "postgres_connection" {
   value = aws_db_instance.postgres_db.endpoint
 }
@@ -150,4 +151,26 @@ output "postgres_connection" {
 output "postgres_instance_id" {
   description = "The database instance ID"
   value       = aws_db_instance.postgres_db.id
+}
+
+output "postgres_username" {
+  description = "The database username"
+  value       = jsondecode(data.aws_secretsmanager_secret_version.postgres_credentials.secret_string)["username"]
+  sensitive   = true
+}
+
+output "postgres_password" {
+  description = "The database password"
+  value       = jsondecode(data.aws_secretsmanager_secret_version.postgres_credentials.secret_string)["password"]
+  sensitive   = true
+}
+
+output "postgres_secret_name" {
+  description = "The name of the secret in AWS Secrets Manager"
+  value       = data.aws_secretsmanager_secret.postgres_credentials.name
+}
+
+output "postgres_secret_arn" {
+  description = "The arn of the secret in AWS Secrets Manager"
+  value       = data.aws_secretsmanager_secret.postgres_credentials.arn
 }

@@ -10,6 +10,27 @@ ENV ?= dev
 # info block
 HEADER := Provisioning environment: $(ENV)
 
+# for docker login, etc
+AWS_ACCT   := $(shell aws sts get-caller-identity --query "Account" --output text)
+AWS_REGION := $(shell aws configure get region)
+AWS_ARN    := $(AWS_ACCT).dkr.ecr.$(AWS_REGION).amazonaws.com
+
+dlogin:
+	@echo "Logging into ECR: $(AWS_ARN)"
+	aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ARN}
+
+dbuild:
+	@echo "Building Docker image..."
+	docker build -t my-app .
+
+dtag: dbuild
+	@echo "Tagging Docker image..."
+	docker tag my-app:latest $(AWS_ARN)/my-app:latest
+
+dpush: dlogin dtag
+	@echo "Pushing Docker image to ECR..."
+	docker push $(AWS_ARN)/my-app:latest
+
 # reconfigure for prod/dev
 reconfig:
 	@echo "$(if $(filter dev,$(ENV)),$(GREEN),$(RED))$(HEADER)$(RESET)"

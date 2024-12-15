@@ -1,3 +1,10 @@
+# CloudWatch Log Group
+resource "aws_cloudwatch_log_group" "ecs_log_group" {
+  name              = local.ecs_log_group
+  retention_in_days = 30
+}
+
+
 # Application Load Balancer
 resource "aws_lb" "app_lb" {
   name               = "${replace(lower(var.tags["Project"]), "/[^a-z0-9-]/", "-")}-alb"
@@ -48,7 +55,6 @@ resource "aws_ecr_repository" "my_repo" {
   }
 }
 
-
 # ECS Cluster
 resource "aws_ecs_cluster" "main" {
   name = "${var.tags["Project"]}-cluster"
@@ -67,13 +73,13 @@ resource "aws_ecs_task_definition" "app" {
 
   container_definitions = jsonencode([{
     name  = "${var.tags["Project"]}-container"
-    image = var.container_name
-    
+    image = "975049904953.dkr.ecr.us-east-1.amazonaws.com/${var.ecr_repository_name}:latest"
+
     portMappings = [{
       containerPort = 80
       hostPort      = 80
     }]
-    
+
     secrets = [{
       name      = "DB_SECRET"
       valueFrom = data.aws_secretsmanager_secret.postgres_credentials.arn
@@ -82,7 +88,7 @@ resource "aws_ecs_task_definition" "app" {
     logConfiguration = {
       logDriver = "awslogs"
       options = {
-        awslogs-group         = "/ecs/${var.tags["Project"]}"
+        awslogs-group         = local.ecs_log_group
         awslogs-region        = var.aws_region
         awslogs-stream-prefix = "ecs"
       }
@@ -207,6 +213,46 @@ resource "aws_iam_role_policy" "ecs_task_secrets_rds" {
   })
 }
 
+# Add a policy to the ECS execution role to access Secrets Manager
+resource "aws_iam_role_policy" "ecs_execution_secrets" {
+  name = "${var.tags["Project"]}-ecs-execution-secrets-policy"
+  role = aws_iam_role.ecs_execution_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = [data.aws_secretsmanager_secret.postgres_credentials.arn]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetAuthorizationToken"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogStreams",
+          "logs:DescribeLogGroups"
+        ]
+        Resource = "arn:aws:logs:*:*:*"
+      }
+    ]
+  })
+}
+
 # Security Groups
 resource "aws_security_group" "alb_sg" {
   name        = "${var.tags["Project"]}-alb-sg"
@@ -260,4 +306,41 @@ resource "aws_security_group_rule" "rds_from_ecs" {
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.ecs_tasks.id
   security_group_id        = aws_security_group.postgres_sg.id
+}
+
+# this doesn work in a container
+resource "null_resource" "build_and_push_docker_image" {
+  # docker build -t my-app .
+  provisioner "local-exec" {
+    command = <<EOT
+      docker build -t ${var.container_name}:latest .
+      aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com
+      docker tag ${var.container_name}:latest ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${var.ecr_repository_name}:latest
+      docker push ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${var.ecr_repository_name}:latest
+    EOT
+  }
+
+  depends_on = [aws_ecr_repository.my_repo]
+}
+
+data "aws_caller_identity" "current" {}
+
+output "alb_dns_name" {
+  value = aws_lb.app_lb.dns_name
+}
+
+output "ecs_cluster_name" {
+  value = aws_ecs_cluster.main.name
+}
+
+output "ecs_service_name" {
+  value = aws_ecs_service.main.name
+}
+
+output "ecr_repository_url" {
+  value = aws_ecr_repository.my_repo.repository_url
+}
+
+output "target_group_arn" {
+  value = aws_lb_target_group.app.arn
 }

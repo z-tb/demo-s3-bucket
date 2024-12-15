@@ -44,4 +44,5 @@ locals {
   lambda_function_name = "${var.tags.Name}-LAMBDA"
   ec2_availability_zone = "${var.aws_region}c"
   availability_zones = [for suffix in ["a", "b", "c"] : "${var.aws_region}${suffix}"]
+  ecs_log_group = "/ecs/${var.tags["Project"]}-LOG-GRP"
 }

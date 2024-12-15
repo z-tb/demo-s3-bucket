@@ -1,11 +1,11 @@
 aws_region          = "us-east-1"
-bucket_name         = "aws-demo-bucket-2039"
+bucket_name         = "aws-ztb-demo-bucket-2039"
 
 # project tagging tag map
 tags = {
-    "Project"       = "aws_demo"
+    "Project"       = "aws_ztb_demo"
     "Owner"         = "abc"
-    "Name"          = "ec2_demo"
+    "Name"          = "ec2_ztb_demo"
     "Environment"   = "dev"
 }
 
@@ -41,6 +41,6 @@ parameter_group_name   = "default.postgres13"
 postgres_credentials_name = "postgres-credentials"  # this needs to match the aws cli command in rds.tf
 
 # ecs/ecr/alb
-ecs_cluster_name = "my-ecs-cluster"
-ecr_repository_name = "my-ecr-repository"
-container_name = "my-ecr-container"
+ecs_cluster_name       = "my-ecs-cluster"
+ecr_repository_name    = "my-ecr-repository"
+container_name         = "my-ecr-container"
