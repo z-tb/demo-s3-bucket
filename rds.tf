@@ -21,6 +21,10 @@ To get the SSM (session manager) plugin installed
   sudo curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
   sudo apt install ./session-manager-plugin.deb
 
+  $ aws ssm start-session  --target i-0b19bf8e28dfe2dff
+  Starting session with SessionId: cloud_user-glkpjz522v4e2ch4zioz86uqi8
+  $ dir
+  
 */
 
 
