@@ -1,4 +1,4 @@
-aws_region          = "us-west-2"
+aws_region          = "us-east-1"
 bucket_name         = "aws-demo-bucket-2039"
 
 # project tagging tag map
@@ -25,12 +25,12 @@ restrict_public_buckets = true
 
 
 # ec2
-ec2_ami_id              = "ami-0cf2b4e024cdb6960"
+ec2_ami_id              = "ami-0e2c8caa4b6378d8c"
 ec2_instance_type       = "t2.micro"
-ec2_availability_zone   = "us-west-2c"
 ec2_ssh_public_key      = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINbUFKGxzkTOWswo7TSw3PVu8C6HvJHuDYlmBSHVu0Wu your_email@example.com"
 
 # rds
+# NOTE: *** See rds.tf for pre-apply instructions ***
 db_instance_identifier = "my-postgres-db"
 allocated_storage      = 20
 storage_type           = "gp2"

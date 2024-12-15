@@ -85,7 +85,7 @@ resource "aws_key_pair" "this_key_pair" {
 data "aws_subnet" "public_sub" {
   filter {
     name   = "tag:Name"
-    values = ["pub-subnet-${var.ec2_availability_zone}"]
+    values = ["pub-subnet-${local.ec2_availability_zone}"]
   }
 
   depends_on = [ aws_subnet.public_subnet ]
@@ -95,7 +95,7 @@ data "aws_subnet" "public_sub" {
 data "aws_subnet" "private_sub" {
   filter {
     name   = "tag:Name"
-    values = ["priv-subnet-${var.ec2_availability_zone}"]
+    values = ["priv-subnet-${local.ec2_availability_zone}"]
   }
 
   depends_on = [aws_subnet.private_subnet]
@@ -107,7 +107,7 @@ resource "aws_instance" "this_ec2_instance" {
   instance_type     = var.ec2_instance_type
   subnet_id         = data.aws_subnet.public_sub.id
   security_groups   = [aws_security_group.ec2_sg.id]
-  availability_zone = var.ec2_availability_zone
+  availability_zone = local.ec2_availability_zone
   key_name          = aws_key_pair.this_key_pair.key_name
   iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
   
@@ -120,7 +120,7 @@ resource "aws_instance" "private_ec2_instance" {
   instance_type     = var.ec2_instance_type
   subnet_id         = data.aws_subnet.private_sub.id
   security_groups   = [aws_security_group.private_ec2_sg.id]
-  availability_zone = var.ec2_availability_zone
+  availability_zone = local.ec2_availability_zone
   key_name          = aws_key_pair.this_key_pair.key_name
   iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
 
@@ -236,13 +236,13 @@ output "private_instance_id" {
 
 # Output the public IP address of the instance
 output "instance_public_ip" {
-  description = "Public IP address of the EC2 instance"
+  description = "Public IP address of the EC2 instance: aws ssm start-session --target <instance-id>"
   value       = aws_instance.this_ec2_instance.public_ip
 }
 
 # private ec2 IP address
 output "private_instance_ip" {
-  description = "Private IP address of the EC2 instance in the private subnet"
+  description = "Private IP address of the EC2 instance in the private subnet: aws ssm start-session --target <instance-id>"
   value       = aws_instance.private_ec2_instance.private_ip
 }
 

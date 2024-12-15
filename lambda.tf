@@ -1,9 +1,4 @@
 
-locals {
-  # used in multiple places - for lambda function and cloudwatch log group
-  lambda_function_name = "${var.tags.Name}-LAMBDA"
-}
-
 # define the path to the zip file that contains the lambda function
 data "archive_file" "lambda_function_zip" {
   type        = "zip"
@@ -85,55 +80,6 @@ resource "aws_iam_role" "lambda_role" {
     ]
   })
 
-  # Attach a policy that allows writing to CloudWatch Logs
-  # https://registry.terraform.io/providers/hashicorp/aws/3.56.0/docs/resources/lambda_function
-  inline_policy {
-    name = "${var.tags.Name}-LOG-POL"
-
-    policy = jsonencode({
-      Version   = "2012-10-17",
-      Statement = [
-        {
-          Action   = ["logs:CreateLogGroup", 
-                      "logs:CreateLogStream",
-                      "logs:PutLogEvents"],
-          Effect   = "Allow",
-          Resource = "arn:aws:logs:*:*:*"
-        }
-      ]
-    })
-  }
-
-  # add an inline policy that allows listing all s3 buckets and reading/writing to the specific var.bucket_name bucket
-  inline_policy {
-    name = "${var.tags.Name}-S3-POL"
-
-    policy = jsonencode({
-      Version   = "2012-10-17",
-      Statement = [
-        {
-          Action   = ["S3:ListAllMyBuckets"]
-
-          Effect   = "Allow",
-          Resource = ["arn:aws:s3:::*"]
-        },
-        {
-          Action   = ["s3:GetBucketLocation",
-                      "s3:ListBucket",
-                      "S3:ListAllMyBuckets",
-                      "s3:ListBucketMultipartUploads",
-                      "s3:ListMultipartUploadParts",
-                      "s3:PutObject",
-                      "s3:GetObject",
-                      "s3:DeleteObject",
-                      "s3:AbortMultipartUpload"],
-          Effect   = "Allow",
-          Resource = ["arn:aws:s3:::${var.bucket_name}",
-                      "arn:aws:s3:::${var.bucket_name}/*"]
-        }
-      ]
-    })
-  }
 
   /* # Allow access to the specified Secrets Manager secret
   # follow Resource with "*" because the ARN for the secret has a few AWS generated characters after the actual name
@@ -198,6 +144,55 @@ resource "aws_iam_role" "lambda_role" {
   tags = var.tags
 }
 
+# CloudWatch Logs policy
+resource "aws_iam_role_policy" "cloudwatch_logs_policy" {
+  name = "${var.tags.Name}-LOG-POL"
+  role = aws_iam_role.lambda_role.id
+
+  policy = jsonencode({
+    Version   = "2012-10-17",
+    Statement = [
+      {
+        Action   = ["logs:CreateLogGroup", 
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"],
+        Effect   = "Allow",
+        Resource = "arn:aws:logs:*:*:*"
+      }
+    ]
+  })
+}
+
+# S3 policy
+resource "aws_iam_role_policy" "s3_policy" {
+  name = "${var.tags.Name}-S3-POL"
+  role = aws_iam_role.lambda_role.id
+
+  policy = jsonencode({
+    Version   = "2012-10-17",
+    Statement = [
+      {
+        Action   = ["s3:ListAllMyBuckets"]
+        Effect   = "Allow",
+        Resource = ["arn:aws:s3:::*"]
+      },
+      {
+        Action   = ["s3:GetBucketLocation",
+                    "s3:ListBucket",
+                    "s3:ListAllMyBuckets",
+                    "s3:ListBucketMultipartUploads",
+                    "s3:ListMultipartUploadParts",
+                    "s3:PutObject",
+                    "s3:GetObject",
+                    "s3:DeleteObject",
+                    "s3:AbortMultipartUpload"],
+        Effect   = "Allow",
+        Resource = ["arn:aws:s3:::${var.bucket_name}",
+                    "arn:aws:s3:::${var.bucket_name}/*"]
+      }
+    ]
+  })
+}
 
 resource "aws_cloudwatch_event_rule" "lambda_schedule_rule" {
   name                = "${var.tags.Name}-CW-RULE"

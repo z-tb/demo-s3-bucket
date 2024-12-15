@@ -97,10 +97,6 @@ variable "ec2_instance_type" {
   type        = string
 }
 
-variable "ec2_availability_zone" {
-  description = "value of the EC2 instance availability zone."
-  type        = string
-}
 
 variable "tags" {
   description = "A map of tags to add to all resources."
@@ -142,12 +138,6 @@ variable "database_subnet_cidr_blocks" {
   description = "CIDR blocks for database subnet"
   type        = list(string)
   default     = ["10.1.4.0/24", "10.1.5.0/24", "10.1.6.0/24"] 
-}
-
-# List of availability zones
-variable "availability_zones" {
-  description = "List of availability zones for subnets"
-  default     = ["us-west-2a", "us-west-2b", "us-west-2c"]
 }
 
 # ssh pubkey used for ec2 access
