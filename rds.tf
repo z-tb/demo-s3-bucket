@@ -21,6 +21,10 @@ To get the SSM (session manager) plugin installed
   sudo curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
   sudo apt install ./session-manager-plugin.deb
 
+  $ aws ecs list-tasks --cluster aws_ztb_demo-cluster
+  
+  $ aws ecs describe-tasks --cluster aws_ztb_demo-cluster --tasks arn:aws:ecs:us-east-1:767397669345:task/aws_ztb_demo-cluster/9a77f9d0bad74270b565c86890e29fb5
+
   $ aws ssm start-session  --target i-0b19bf8e28dfe2dff
   Starting session with SessionId: cloud_user-glkpjz522v4e2ch4zioz86uqi8
   $ dir

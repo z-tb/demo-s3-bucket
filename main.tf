@@ -24,6 +24,7 @@ resource "aws_s3_bucket" "my_bucket" {
   tags = var.tags
 }  
   
+data "aws_caller_identity" "current" {}
 
 # S3 bucket encryption - bucket key and AES
 resource "aws_s3_bucket_server_side_encryption_configuration" "my_s3_bucket_encryption" {
@@ -45,4 +46,5 @@ locals {
   ec2_availability_zone = "${var.aws_region}c"
   availability_zones = [for suffix in ["a", "b", "c"] : "${var.aws_region}${suffix}"]
   ecs_log_group = "/ecs/${var.tags["Project"]}-LOG-GRP"
+  container_image_arn = "${data.aws_caller_identity.current.id}.dkr.ecr.${var.aws_region}.amazonaws.com/${var.ecr_repository_name}:latest"
 }

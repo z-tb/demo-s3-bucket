@@ -5,16 +5,17 @@ FROM python:3.10-slim-buster
 WORKDIR /app
 
 # Copy the current directory contents into the container at /app
-COPY . /app
+COPY application/ /app/
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Make port 80 available to the world outside this container
-EXPOSE 80
-
 # Define environment variable
 ENV NAME=SOME_VAR
 
-# Run app.py when the container launches
+# Expose port 8000 to the outside world
+EXPOSE 80
+
+# Use Gunicorn to serve the Flask app
+# CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
 CMD ["python", "app.py"]

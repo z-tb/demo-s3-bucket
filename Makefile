@@ -11,9 +11,11 @@ ENV ?= dev
 HEADER := Provisioning environment: $(ENV)
 
 # for docker login, etc
-AWS_ACCT   := $(shell aws sts get-caller-identity --query "Account" --output text)
-AWS_REGION := $(shell aws configure get region)
-AWS_ARN    := $(AWS_ACCT).dkr.ecr.$(AWS_REGION).amazonaws.com
+AWS_ACCT  		= $(shell aws sts get-caller-identity --query "Account" --output text)
+AWS_REGION	    = $(shell aws configure get region)
+AWS_ARN    		= $(AWS_ACCT).dkr.ecr.$(AWS_REGION).amazonaws.com
+ECR_REPO_NAME 	= $(shell grep -E 'ecr_repository_name\s*=' dev.tfvars | awk -F'=' '{print $$2}' | tr -d ' "')
+
 
 dlogin:
 	@echo "Logging into ECR: $(AWS_ARN)"
@@ -25,11 +27,11 @@ dbuild:
 
 dtag: dbuild
 	@echo "Tagging Docker image..."
-	docker tag my-app:latest $(AWS_ARN)/my-app:latest
+	docker tag my-app:latest $(AWS_ARN)/${ECR_REPO_NAME}:latest
 
 dpush: dlogin dtag
 	@echo "Pushing Docker image to ECR..."
-	docker push $(AWS_ARN)/my-app:latest
+	docker push $(AWS_ARN)/${ECR_REPO_NAME}:latest
 
 # reconfigure for prod/dev
 reconfig:

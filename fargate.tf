@@ -40,7 +40,7 @@ resource "aws_lb_target_group" "app" {
     protocol            = "HTTP"
     matcher             = "200"
     timeout             = "3"
-    path                = "/healthz"
+    path                = "/"
     unhealthy_threshold = "2"
   }
 }
@@ -73,7 +73,7 @@ resource "aws_ecs_task_definition" "app" {
 
   container_definitions = jsonencode([{
     name  = "${var.tags["Project"]}-container"
-    image = "975049904953.dkr.ecr.us-east-1.amazonaws.com/${var.ecr_repository_name}:latest"
+    image = local.container_image_arn
 
     portMappings = [{
       containerPort = 80
@@ -214,7 +214,7 @@ resource "aws_iam_role_policy" "ecs_task_secrets_rds" {
 }
 
 # Add a policy to the ECS execution role to access Secrets Manager
-resource "aws_iam_role_policy" "ecs_execution_secrets" {
+resource "aws_iam_role_policy" "ecs_execution_perms" {
   name = "${var.tags["Project"]}-ecs-execution-secrets-policy"
   role = aws_iam_role.ecs_execution_role.id
 
@@ -234,7 +234,9 @@ resource "aws_iam_role_policy" "ecs_execution_secrets" {
           "ecr:GetDownloadUrlForLayer",
           "ecr:BatchGetImage",
           "ecr:BatchCheckLayerAvailability",
-          "ecr:GetAuthorizationToken"
+          "ecr:GetAuthorizationToken",
+          "ecr:GetRepositoryPolicy",
+          "ecr:BatchGetImageManifest"          
         ]
         Resource = "*"
       },
@@ -313,17 +315,12 @@ resource "null_resource" "build_and_push_docker_image" {
   # docker build -t my-app .
   provisioner "local-exec" {
     command = <<EOT
-      docker build -t ${var.container_name}:latest .
-      aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com
-      docker tag ${var.container_name}:latest ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${var.ecr_repository_name}:latest
-      docker push ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${var.ecr_repository_name}:latest
+      make dpush
     EOT
   }
 
   depends_on = [aws_ecr_repository.my_repo]
 }
-
-data "aws_caller_identity" "current" {}
 
 output "alb_dns_name" {
   value = aws_lb.app_lb.dns_name
