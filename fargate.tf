@@ -1,3 +1,50 @@
+# connect to the ecs task using SSM
+#
+# 1) get the task-id of the currently running containers/tasks
+#     (cluster and service names will be in the terrafrom output after applying)
+#
+#  example: $ aws ecs list-tasks --cluster aws_ztb_demo-cluster --service aws_ztb_demo-service
+#     {
+#         "taskArns": [
+#             "arn:aws:ecs:us-east-1:905418062037:task/aws_ztb_demo-cluster/703ba4a12efb4bada02dae1c41d2a658",
+#             "arn:aws:ecs:us-east-1:905418062037:task/aws_ztb_demo-cluster/8a644d0a28674172823ea3cbbd24f94d"
+#        ]                                                                  ^______________________________^
+#     }                                                       The task-id portion      |
+#                                                                                      |      
+# 2) get the container name:                                               v------------------------------v
+#  example: aws ecs describe-tasks --cluster aws_ztb_demo-cluster --tasks 8a644d0a28674172823ea3cbbd24f94d | jq .tasks[0].containers[0].name
+#
+# 3) launch the SSM connection
+# aws ecs execute-command --cluster aws_ztb_demo-cluster \
+#  --task 8a644d0a28674172823ea3cbbd24f94d \
+#  --container aws_ztb_demo-container \
+#  --interactive \
+#  --command "/bin/bash"
+#
+# If you get this message:
+# SessionManagerPlugin is not found. Please refer to SessionManager 
+# Documentation here: http://docs.aws.amazon.com/console/systems-manager/session-manager-plugin-not-found
+# then run the following command:
+# curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "/tmp/session-manager-plugin.deb"
+# sudo apt install /tmp/session-manager-plugin.deb
+#
+# If you get this message launching the SSM connection:
+#   The Session Manager plugin was installed successfully. Use the AWS CLI to start a session.
+#   An error occurred (InvalidParameterException) when calling the ExecuteCommand operation: 
+#   The execute command failed because execute command was not enabled when the task was run 
+#   or the execute command agent isn’t running. Wait and try again or run a new task with execute
+#   command enabled and try again.
+#
+#   You can check the state of the execute command on the tasks with the following command:
+#        aws ecs describe-services --cluster aws_ztb_demo-cluster --services aws_ztb_demo-service --query 'services[0].enableExecuteCommand'
+#
+#   Then relaunch the services and try with the new tasks. I'm not sure if this is a bug or not.
+# aws ecs update-service --cluster aws_ztb_demo-cluster \
+#    --service aws_ztb_demo-service \
+#    --force-new-deployment
+
+
+
 # CloudWatch Log Group
 resource "aws_cloudwatch_log_group" "ecs_log_group" {
   name              = local.ecs_log_group
@@ -118,12 +165,16 @@ resource "aws_ecs_service" "main" {
     container_port   = 80
   }
 
+  # allow execute command in ECS 
+  enable_execute_command = true  # Add this line
+
   depends_on = [aws_lb_listener.front_end]
 
   tags = var.tags
 }
 
 # Auto Scaling
+# how many tasks to run min-max
 resource "aws_appautoscaling_target" "ecs_target" {
   max_capacity       = 4
   min_capacity       = 2
@@ -132,6 +183,7 @@ resource "aws_appautoscaling_target" "ecs_target" {
   service_namespace  = "ecs"
 }
 
+# scaling policy - when to scale
 resource "aws_appautoscaling_policy" "ecs_policy" {
   name               = "${var.tags["Project"]}-scaling-policy"
   policy_type        = "TargetTrackingScaling"
@@ -165,11 +217,13 @@ resource "aws_iam_role" "ecs_execution_role" {
   tags = var.tags
 }
 
+# task execution role - setup container environment, etc
 resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
   role       = aws_iam_role.ecs_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+# task role - app inside container (access postgres or SM. etc)
 resource "aws_iam_role" "ecs_task_role" {
   name = "${var.tags["Project"]}-ecs-task-role"
 
@@ -213,7 +267,8 @@ resource "aws_iam_role_policy" "ecs_task_secrets_rds" {
   })
 }
 
-# Add a policy to the ECS execution role to access Secrets Manager
+# Add a policy to the ECS execution role to access Secrets Manager for the postgres credentials
+# this way, the creds could be exported to the container environment as env variables and SM access could be removed
 resource "aws_iam_role_policy" "ecs_execution_perms" {
   name = "${var.tags["Project"]}-ecs-execution-secrets-policy"
   role = aws_iam_role.ecs_execution_role.id
@@ -255,7 +310,28 @@ resource "aws_iam_role_policy" "ecs_execution_perms" {
   })
 }
 
-# Security Groups
+# allow use of SSM by the ECS tasks - this allows SSM via aws cli so you can get a shell
+resource "aws_iam_role_policy" "ecs_task_ssm" {
+  name = "${var.tags["Project"]}-ecs-task-ssm-policy"
+  role = aws_iam_role.ecs_task_role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssmmessages:CreateControlChannel",
+          "ssmmessages:CreateDataChannel",
+          "ssmmessages:OpenControlChannel",
+          "ssmmessages:OpenDataChannel"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# Security Groups - allow access from the ALB
 resource "aws_security_group" "alb_sg" {
   name        = "${var.tags["Project"]}-alb-sg"
   description = "Controls access to the ALB"
@@ -278,6 +354,7 @@ resource "aws_security_group" "alb_sg" {
   tags = var.tags
 }
 
+# Security Group for ECS tasks to alow access from the ALB
 resource "aws_security_group" "ecs_tasks" {
   name        = "${var.tags["Project"]}-ecs-tasks-sg"
   description = "Allow inbound access from the ALB only"
@@ -310,7 +387,7 @@ resource "aws_security_group_rule" "rds_from_ecs" {
   security_group_id        = aws_security_group.postgres_sg.id
 }
 
-# this doesn work in a container
+# this doesnt work in a container
 resource "null_resource" "build_and_push_docker_image" {
   # docker build -t my-app .
   provisioner "local-exec" {
