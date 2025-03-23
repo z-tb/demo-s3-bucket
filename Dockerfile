@@ -19,3 +19,7 @@ EXPOSE 80
 # Use Gunicorn to serve the Flask app
 # CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
 CMD ["python", "app.py"]
+
+# keep the container running by tailing an empty file, allowing some time to SSM into the container to debug
+# CMD ["/bin/bash", "-c", "tail -f /dev/null"]
+
