@@ -5,16 +5,16 @@ resources, RDS postgres database and resources to support a python application r
 The purpose is to set up a secure and scalable network infrastructure for deploying applications.
 
 Additional Resources Created:
-    VPC: A logically isolated section of the AWS cloud.
-    Internet Gateway: Allows communication between the VPC and the internet.
-    Public Subnets: Subnets with direct route to the internet gateway.
-    Private Subnets: Subnets without direct internet access, for enhanced security.
-    NAT Gateways: Allow private subnet resources to access the internet while remaining private.
-    Elastic IPs: Static public IP addresses for the NAT Gateways.
-    Route Tables: Define routing rules for subnets.
-    RDS Postgresql database: see rds.tf for details on implementing the credentials in Secrets Manager.
-    Fargate: 
-      - Full implementation from the ALB back to the Fargate tasks
+- VPC: A logically isolated section of the AWS cloud.
+- Internet Gateway: Allows communication between the VPC and the internet.
+- Public Subnets: Subnets with direct route to the internet gateway.
+- Private Subnets: Subnets without direct internet access, for enhanced security.
+- NAT Gateways: Allow private subnet resources to access the internet while remaining private.
+- Elastic IPs: Static public IP addresses for the NAT Gateways.
+- Route Tables: Define routing rules for subnets.
+- RDS Postgresql database: see rds.tf for details on implementing the credentials in Secrets Manager.
+- Fargate: 
+   - Full implementation from the ALB back to the Fargate tasks
       - Volume mount /var/run/docker.sock in your dev container to build the ECR container and push it
          - match the host group perms in the container (eg: docker group/gid via --user-grou)
              you can build and push the docker image into ECR from the dev container.
