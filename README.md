@@ -1,7 +1,8 @@
-# Terraform AWS S3 Bucket Demo with EC2 and VPC
+# Terraform AWS S3 Bucket Demo with EC2, VPC, RDS and Fargate tasks
 
-Building on the previous S3 Bucket demo branch, this branch creates a Virtual Private Cloud (VPC) and associated network 
-resources in AWS. The purpose is to set up a secure and scalable network infrastructure for deploying applications.
+Building on the previous demo branch, this branch creates an AWS Virtual Private Cloud (VPC), associated network 
+resources, RDS postgres database and resources to support a python application running in Fargate (ELB, ECR, ECS). 
+The purpose is to set up a secure and scalable network infrastructure for deploying applications.
 
 Additional Resources Created:
     VPC: A logically isolated section of the AWS cloud.
@@ -11,6 +12,17 @@ Additional Resources Created:
     NAT Gateways: Allow private subnet resources to access the internet while remaining private.
     Elastic IPs: Static public IP addresses for the NAT Gateways.
     Route Tables: Define routing rules for subnets.
+    RDS Postgresql database: see rds.tf for details on implementing the credentials in Secrets Manager.
+    Fargate: 
+      - Full implementation from the ALB back to the Fargate tasks
+      - Volume mount /var/run/docker.sock in your dev container to build the ECR container and push it
+         - match the host group perms in the container (eg: docker group/gid via --user-grou)
+             you can build and push the docker image into ECR from the dev container.
+             (Makefile excerpt below for reference)
+    Systems Manager: The ECS configuration is implemented with AWS SSM to allow console access to the task while it's running.
+      - useful for debugging
+      - see comments in fargate.tf for more details
+
 
 Benefits
     Secure deployment of public-facing and private resources.
@@ -142,6 +154,36 @@ The Vim modeline at the end of the file provides syntax highlighting and indenta
 # Vim modeline
 # vim: syntax=make ts=8 sw=8 noet
 ```
+
+### using Docker in the dev container
+To set up Docker-in-Docker (DinD) for building and pushing images to Amazon ECR, you'll need to mount the Docker socket and properly configure permissions. 
+
+The host system will look something like this:
+```bash
+ls -l /var/run/docker.sock
+# srw-rw---- 1 root docker 0 Jan 28 14:23 /var/run/docker.sock
+```
+You will need to match the group permission in the container. 
+
+    eg: The Docker socket (/var/run/docker.sock) is owned by root:docker with group ID 999
+
+The container user must be in the same group (GID 999) to access the socket. Without doing this, you'll get "permission denied" errors when trying to use Docker commands in the dev container.
+
+Below is a Makefile target I use for running a dev container for working with Fargate. Be aware that root in the container will have root access to your host Docker daemon this way. This is not suitable for production use since a compromised process in the container can potentially access your host system docker daemon. 
+
+```bash
+runmhdock:
+        docker run -it --rm \
+        --hostname $(IMAGE_NAME) \
+        --user ${USER_UID}:${USER_GROUP_GID} \
+        --group-add docker \
+        --group-add ${DOCKER_GID} \
+        --name ${CONTAINER_NAME} \
+        --volume ${HOST_PATH}:${CONT_APP_MNT} \
+        --volume ${USER_HOME}:/mnt/${USER_HOME}:ro \
+        --volume ${DOCKER_SOCKET}:${CONT_DOCKER_SOCKET} \
+        ${IMAGE_NAME}:${IMAGE_VERSION}
+```        
 
 ## License
 
