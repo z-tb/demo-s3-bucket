@@ -1,5 +1,5 @@
 aws_region          = "us-east-1"
-bucket_name         = "aws-ztb-demo-bucket-2039"
+bucket_name         = "aws-ztb-demo-bucket-3039"
 
 # project tagging tag map
 tags = {
